@@ -1,0 +1,3 @@
+[submodule "docstore"]
+	path = moosex-storage-dbi-pgdoc
+	url = git@github.com:theslava/moosex-storage-dbi-pgdoc.git

@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 
 use strict;
-use FindBin::libs qw( base=local subdir=lib/perl5 );
+use FindBin::libs qw( base=moosex-storage-dbi-pgdoc );
+use FindBin::libs;
 
 use Mojolicious::Lite;
 use JSON;
