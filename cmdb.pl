@@ -26,21 +26,9 @@ our $cim = eval {
 app->log->info("Schema: loaded");
 app->log->info("Classes: creating");
 
-my %classes;
+our %classes;
 for my $class (values %{ $cim->{classes} }) {
-    $classes{ $class->{name} } = Moose::Meta::Class->create(
-        $class->{name} => (
-            'superclasses' => [
-                'CMDB::BaseCI',
-                $class->{superclass},
-            ],
-            'attributes' => [
-                map { Moose::Meta::Attribute->new( $_, is => 'rw' )} keys %{ $class->{properties} }
-            ],
-        )
-    );
-    $classes{ $class->{name} }->make_immutable;
-    app->log->debug("Created class: ".$class->{name});
+    load_class($class);
 }
 
 app->log->info("Classes: created");
@@ -67,5 +55,28 @@ get '/classes' => sub {
 
 app->log->info("Starting main loop");
 app->start;
+
+sub load_class {
+    my ($class) = @_;
+    return unless $class;
+    return if (exists ($classes{ $class->{name} }));
+
+    if ( exists $class->{superclass} ) {
+        load_class( $cim->{classes}->{ lc( $class->{superclass} ) } );
+    }
+    $classes{ $class->{name} } = Moose::Meta::Class->create(
+        $class->{name} => (
+            'superclasses' => [
+                'CMDB::BaseCI',
+                $class->{superclass},
+            ],
+            'attributes' => [
+                map { Moose::Meta::Attribute->new( $_->{name}, is => 'rw' )} keys %{ $class->{properties} }
+            ],
+        )
+    );
+    $classes{ $class->{name} }->make_immutable;
+    app->log->debug("Created class: ".$class->{name});
+}
 
 __END__
