@@ -32,7 +32,7 @@ for my $class (values %{ $cim->{classes} }) {
         $class->{name} => (
             'superclasses' => [
                 'CMDB::BaseCI',
-                $class->{superclasses},
+                $class->{superclass},
             ],
             'attributes' => [
                 map { Moose::Meta::Attribute->new( $_, is => 'rw' )} keys %{ $class->{properties} }
