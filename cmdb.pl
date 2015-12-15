@@ -71,7 +71,7 @@ sub load_class {
                 $class->{superclass},
             ],
             'attributes' => [
-                map { Moose::Meta::Attribute->new( $_->{name}, is => 'rw' )} keys %{ $class->{properties} }
+                map { Moose::Meta::Attribute->new( $_->{name}, is => 'rw' )} values %{ $class->{properties} }
             ],
         )
     );
