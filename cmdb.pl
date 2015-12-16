@@ -48,9 +48,17 @@ get '/schema' => sub {
     }
 };
 
-get '/classes' => sub {
+get '/properties' => sub {
     my $c = shift;
-    $c->render(text => join q{<br/>}, Dumper $classes{$c->req->param('class')});
+    $c->render( 
+        template => 'properties',
+        properties => [ $classes{ $c->req->param('class') }->get_attribute_list ],
+    );
+};
+
+get '/' => sub {
+    my $c = shift;
+    $c->render( template => 'index', classes => [ keys %classes ] );
 };
 
 app->log->info("Starting main loop");
@@ -71,7 +79,7 @@ sub load_class {
                 $class->{superclass},
             ],
             'attributes' => [
-                map { Moose::Meta::Attribute->new( $_->{name}, is => 'rw' )} values %{ $class->{properties} }
+                map { Moose::Meta::Attribute->new( $_, is => 'rw' )} keys %{ $class->{properties} }
             ],
         )
     );

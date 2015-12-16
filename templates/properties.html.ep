@@ -1,0 +1,3 @@
+% for my $prop (sort @{ $properties }) {
+<%= $prop %>: <input type='text' name='<%= $prop %>'/><br/>
+% }

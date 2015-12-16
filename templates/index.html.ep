@@ -1,0 +1,34 @@
+<html>
+	<head>
+		<title>CMDB</title>
+		<script type='text/javascript'>
+			function get_attributes(e) {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+						document.getElementById('CIProperties').innerHTML = xhttp.responseText;
+					}
+				};
+				xhttp.open('get', '/properties?class=' + e.text, true);
+				xhttp.send();
+			}
+		</script>
+	</head>
+	<body>
+		<form id='ciform' method='post'>
+			<div id='CIClass'>
+				<select>
+					<% for my $class (sort @{$classes}) { %>
+						<option value="<%= lc $class %>" onmouseup='get_attributes(this)'>
+							<%= $class %>
+						</option>
+					<% } %>
+				</select>
+			</div>
+			<div id='CIProperties'>
+			</div>
+			<input type='submit' value='create/update'/>
+			<input type='submit' value='search'/>
+		</form>
+	</body>
+</html>
