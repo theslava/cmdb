@@ -4,24 +4,34 @@ use strict;
 use FindBin::libs qw( base=moosex-storage-dbi-pgdoc subdir=lib subonly );
 use FindBin::libs;
 
-use Data::Dumper;
 use CMDB::BaseCI;
+use DBI;
+use Data::Dumper;
+use JSON;
+use Mojolicious::Lite;
 use Moose;
 
-# Mojolicious: where the magic happens
-use Mojolicious::Lite;
+
+my $dbh = DBI->connect(
+    'dbi:Pg:db=json;host=localhost;port=5432',
+    'json',
+    'json',
+    { RaiseError => 1, PrintError => 1 },
+);
+die $DBI::errstr unless $dbh;
+helper db => sub { $dbh };
 
 # Set up the data
-use JSON;
 app->log->info("Schema: loading");
 
-our $cim = eval {
+my $cim = eval {
     local $/ = undef;
     open my $fh, q{<}, 'etc/dmtf_cim_schema_2.44.1.json';
     my $ret = <$fh>;
     close $fh;
     return decode_json($ret);
 };
+helper cim => sub { $cim };
 
 app->log->info("Schema: loaded");
 app->log->info("Classes: creating");
@@ -36,7 +46,7 @@ app->log->info("Setting up routes");
 
 get '/schema' => sub {
     my $c = shift;
-    my $pointer = $cim;
+    my $pointer = $c->cim;
     for my $key (split /:/, $c->req->param('path')) {
         $pointer = $pointer->{$key};
     }
@@ -52,13 +62,18 @@ get '/properties' => sub {
     my $c = shift;
     $c->render( 
         template => 'properties',
-        properties => [ $classes{ $c->req->param('class') }->get_attribute_list ],
+        metaclass => $classes{ $c->req->param('class') },
     );
 };
 
 get '/' => sub {
     my $c = shift;
     $c->render( template => 'index', classes => [ keys %classes ] );
+};
+
+get '/ci/:uuid' => sub {
+    my $c = shift;
+    $c->render( text => join q{}, Dumper( CMDB::BaseCI->load( $c->db, $c->param('uuid') ) ) );
 };
 
 app->log->info("Starting main loop");
@@ -79,7 +94,7 @@ sub load_class {
                 $class->{superclass},
             ],
             'attributes' => [
-                map { Moose::Meta::Attribute->new( $_, is => 'rw' )} keys %{ $class->{properties} }
+                map { Moose::Meta::Attribute->new( $_, is => 'rw', documentation => $class->{properties}->{$_}->{name} )} keys %{ $class->{properties} }
             ],
         )
     );

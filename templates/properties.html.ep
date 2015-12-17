@@ -1,3 +1,4 @@
-% for my $prop (sort @{ $properties }) {
-<%= $prop %>: <input type='text' name='<%= $prop %>'/><br/>
+% for my $property (sort { $a->{name} cmp $b->{name} } $metaclass->get_all_attributes) {
+<%= $metaclass->find_attribute_by_name($property->name)->documentation || $property->name %>:
+ <input type='text' name='<%= $property->name %>'/><br/>
 % }
