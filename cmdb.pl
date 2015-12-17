@@ -71,6 +71,25 @@ get '/' => sub {
     $c->render( template => 'index', classes => [ keys %classes ] );
 };
 
+post '/' => sub {
+    my $c = shift;
+    my %params = %{$c->req->params->to_hash};
+    my $class = delete $params{ci_class};
+    my %init = ();
+    for my $key (keys %params) {
+        if ($params{$key} ne q{}) {
+            $init{$key} = $params{$key};
+        }
+    }
+    my $obj = eval "$class->new(%init)";
+    if ($@) {
+        $c->render( text => $@ );
+    }
+    else {
+        $c->render( text => $obj->freeze );
+    }
+};
+
 get '/ci/:uuid' => sub {
     my $c = shift;
     $c->render( text => join q{}, Dumper( CMDB::BaseCI->load( $c->db, $c->param('uuid') ) ) );
