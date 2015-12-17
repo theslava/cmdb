@@ -17,9 +17,9 @@
 	<body>
 		<form id='ciform' method='post'>
 			<div id='CIClass'>
-				<select>
+				<select name='ci_class'>
 					<% for my $class (sort @{$classes}) { %>
-						<option value="<%= lc $class %>" onmouseup='get_attributes(this)'>
+						<option value="<%= $class %>" onmouseup='get_attributes(this)'>
 							<%= $class %>
 						</option>
 					<% } %>
