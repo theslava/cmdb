@@ -38,6 +38,13 @@ DISTRIBUTIONS
       strict 0
       version 0.88
       warnings 0
+  Carp-Clan-6.04
+    pathname: S/ST/STBEY/Carp-Clan-6.04.tar.gz
+    provides:
+      Carp::Clan 6.04
+    requirements:
+      ExtUtils::MakeMaker 0
+      Test::Exception 0
   Class-Load-0.23
     pathname: E/ET/ETHER/Class-Load-0.23.tar.gz
     provides:
@@ -840,6 +847,48 @@ DISTRIBUTIONS
       YAML::Any 0
       namespace::autoclean 0
       perl 5.008
+  MooseX-Types-0.46
+    pathname: E/ET/ETHER/MooseX-Types-0.46.tar.gz
+    provides:
+      MooseX::Types 0.46
+      MooseX::Types::Base 0.46
+      MooseX::Types::CheckedUtilExports 0.46
+      MooseX::Types::Combine 0.46
+      MooseX::Types::Moose 0.46
+      MooseX::Types::TypeDecorator 0.46
+      MooseX::Types::UndefinedType 0.46
+      MooseX::Types::Util 0.46
+      MooseX::Types::Wrapper 0.46
+    requirements:
+      Carp 0
+      Carp::Clan 6.00
+      Exporter 0
+      Module::Build::Tiny 0.007
+      Module::Runtime 0
+      Moose 1.06
+      Moose::Exporter 0
+      Moose::Meta::TypeConstraint::Union 0
+      Moose::Util::TypeConstraints 0
+      Scalar::Util 1.19
+      Sub::Exporter 0
+      Sub::Exporter::ForMethods 0.100052
+      Sub::Name 0
+      base 0
+      namespace::autoclean 0.16
+      overload 0
+      perl 5.008
+      strict 0
+      warnings 0
+  MooseX-Types-UUID-0.03
+    pathname: B/BO/BOBTFISH/MooseX-Types-UUID-0.03.tar.gz
+    provides:
+      MooseX::Types::UUID 0.03
+    requirements:
+      ExtUtils::MakeMaker 6.42
+      MooseX::Types 0
+      Test::Exception 0
+      Test::More 0
+      ok 0
   Package-DeprecationManager-0.15
     pathname: D/DR/DROLSKY/Package-DeprecationManager-0.15.tar.gz
     provides:
@@ -917,6 +966,17 @@ DISTRIBUTIONS
       Sub::Install 0.92
       strict 0
       warnings 0
+  Sub-Exporter-ForMethods-0.100052
+    pathname: R/RJ/RJBS/Sub-Exporter-ForMethods-0.100052.tar.gz
+    provides:
+      Sub::Exporter::ForMethods 0.100052
+    requirements:
+      ExtUtils::MakeMaker 0
+      Scalar::Util 0
+      Sub::Exporter 0.978
+      Sub::Name 0
+      strict 0
+      warnings 0
   Sub-Exporter-Progressive-0.001011
     pathname: F/FR/FREW/Sub-Exporter-Progressive-0.001011.tar.gz
     provides:
@@ -953,6 +1013,17 @@ DISTRIBUTIONS
       perl 5.006
       strict 0
       warnings 0
+  Sub-Uplevel-0.25
+    pathname: D/DA/DAGOLDEN/Sub-Uplevel-0.25.tar.gz
+    provides:
+      Sub::Uplevel 0.25
+    requirements:
+      Carp 0
+      ExtUtils::MakeMaker 6.17
+      constant 0
+      perl 5.006
+      strict 0
+      warnings 0
   Task-Weaken-1.04
     pathname: A/AD/ADAMK/Task-Weaken-1.04.tar.gz
     provides:
@@ -963,6 +1034,44 @@ DISTRIBUTIONS
       Scalar::Util 1.14
       Test::More 0.42
       perl 5.005
+  Test-Exception-0.40
+    pathname: E/EX/EXODIST/Test-Exception-0.40.tar.gz
+    provides:
+      Test::Exception 0.40
+    requirements:
+      Carp 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Sub::Uplevel 0.18
+      Test::Builder 0.7
+      Test::Builder::Tester 1.07
+      Test::Harness 2.03
+      base 0
+      perl 5.006001
+      strict 0
+      warnings 0
+  Test-Simple-1.001014
+    pathname: E/EX/EXODIST/Test-Simple-1.001014.tar.gz
+    provides:
+      Test::Builder 1.001014
+      Test::Builder::IO::Scalar 2.113
+      Test::Builder::Module 1.001014
+      Test::Builder::Tester 1.28
+      Test::Builder::Tester::Color 1.290001
+      Test::Builder::Tester::Tie 1.28
+      Test::More 1.001014
+      Test::Simple 1.001014
+      Test::Tester 0.114
+      Test::Tester::Capture undef
+      Test::Tester::CaptureRunner undef
+      Test::Tester::Delegate undef
+      Test::use::ok 0.16
+      ok 0.16
+    requirements:
+      ExtUtils::MakeMaker 0
+      Scalar::Util 1.13
+      Test::Harness 2.03
+      perl 5.006
   Try-Tiny-0.22
     pathname: D/DO/DOY/Try-Tiny-0.22.tar.gz
     provides:
