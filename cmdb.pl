@@ -11,12 +11,10 @@ use JSON;
 use Mojolicious::Lite;
 use Moose;
 
-
 my $dbh = DBI->connect(
     'dbi:Pg:db=json;host=localhost;port=5432',
     'json',
     'json',
-    { RaiseError => 1, PrintError => 1 },
 );
 die $DBI::errstr unless $dbh;
 helper db => sub { $dbh };
@@ -44,7 +42,7 @@ for my $class (values %{ $cim->{classes} }) {
 app->log->info("Classes: created");
 app->log->info("Setting up routes");
 
-get '/schema' => sub {
+get '/cmdb/schema' => sub {
     my $c = shift;
     my $pointer = $c->cim;
     for my $key (split /:/, $c->req->param('path')) {
@@ -58,7 +56,7 @@ get '/schema' => sub {
     }
 };
 
-get '/properties' => sub {
+get '/cmdb/get_properties' => sub {
     my $c = shift;
     $c->render( 
         template => 'properties',
@@ -66,12 +64,22 @@ get '/properties' => sub {
     );
 };
 
-get '/' => sub {
+get '/cmdb/:uuid' => { uuid => undef } => sub {
     my $c = shift;
-    $c->render( template => 'index', classes => [ keys %classes ] );
+    if (defined $c->param('uuid')) {
+        my $ci = CMDB::BaseCI->load( $c->db, $c->param('uuid') );
+        app->log->debug(Dumper $ci);
+        $c->render(
+            template => 'ci',
+            ci => $ci,
+        );
+    }
+    else {
+        $c->render( template => 'index', classes => [ keys %classes ] );
+    }
 };
 
-post '/' => sub {
+post '/cmdb/:uuid' => { uuid => undef } => sub {
     my $c = shift;
     my %params = %{$c->req->params->to_hash};
     my $class = delete $params{ci_class};
@@ -86,13 +94,9 @@ post '/' => sub {
         $c->render( text => $@ );
     }
     else {
-        $c->render( text => $obj->freeze );
+        $obj->store($c->db);
+        $c->redirect_to('/cmdb/'.$obj->uuid);
     }
-};
-
-get '/ci/:uuid' => sub {
-    my $c = shift;
-    $c->render( text => join q{}, Dumper( CMDB::BaseCI->load( $c->db, $c->param('uuid') ) ) );
 };
 
 app->log->info("Starting main loop");
@@ -103,14 +107,15 @@ sub load_class {
     return unless $class;
     return if (exists ($classes{ $class->{name} }));
 
+    my $superclass = 'CMDB::BaseCI';
     if ( exists $class->{superclass} ) {
         load_class( $cim->{classes}->{ lc( $class->{superclass} ) } );
+        $superclass = $class->{superclass};
     }
     $classes{ $class->{name} } = Moose::Meta::Class->create(
         $class->{name} => (
             'superclasses' => [
-                'CMDB::BaseCI',
-                $class->{superclass},
+                $superclass,
             ],
             'attributes' => [
                 map { Moose::Meta::Attribute->new( $_, is => 'rw', documentation => $class->{properties}->{$_}->{name} )} keys %{ $class->{properties} }
@@ -121,4 +126,3 @@ sub load_class {
     app->log->debug("Created class: ".$class->{name});
 }
 
-__END__

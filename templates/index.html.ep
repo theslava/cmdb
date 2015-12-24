@@ -2,24 +2,24 @@
 	<head>
 		<title>CMDB</title>
 		<script type='text/javascript'>
-			function get_attributes(e) {
+			function get_attributes(classname) {
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
 					if (xhttp.readyState == 4 && xhttp.status == 200) {
 						document.getElementById('CIProperties').innerHTML = xhttp.responseText;
 					}
 				};
-				xhttp.open('get', '/properties?class=' + e.text, true);
+				xhttp.open('get', '/cmdb/get_properties?class=' + classname, true);
 				xhttp.send();
 			}
 		</script>
 	</head>
 	<body>
-		<form id='ciform' method='post'>
+		<form id='ciform' method='post' action='/cmdb'>
 			<div id='CIClass'>
-				<select name='ci_class'>
+				<select name='ci_class' onchange='get_attributes(this.value)'>
 					<% for my $class (sort @{$classes}) { %>
-						<option value="<%= $class %>" onmouseup='get_attributes(this)'>
+						<option value="<%= $class %>">
 							<%= $class %>
 						</option>
 					<% } %>
@@ -27,8 +27,7 @@
 			</div>
 			<div id='CIProperties'>
 			</div>
-			<input type='submit' value='create/update'/>
-			<input type='submit' value='search'/>
+			<input type='submit' value='create'/>
 		</form>
 	</body>
 </html>
