@@ -14,6 +14,6 @@ has 'uuid' => (
     }
 );
 
-with Storage (format => 'JSON', io => 'PgDocStore');
+with Storage ( format => 'JSON', io => 'PgJSON' );
 
 1;
