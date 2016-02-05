@@ -11,16 +11,20 @@ use JSON;
 use Mojolicious::Lite;
 use Moose;
 
-my $dbh = DBI->connect(
-    'dbi:Pg:db=json;host=localhost;port=5432',
-    'json',
-    'json',
+my $dbh = DBI->connect_cached(
+    'dbi:Pg:db=cmdb;host=localhost;port=5432',
+    'cmdb',
+    'cmdb',
 );
 die $DBI::errstr unless $dbh;
 helper db => sub { $dbh };
 
 # Set up the data
 app->log->info("Schema: loading");
+
+use CMDB::Schema;
+my $cmdb_schema = CMDB::Schema->new({files => [ glob "etc/*.json" ] });
+app->log->debug(Dumper $cmdb_schema);
 
 my $cim = eval {
     local $/ = undef;
@@ -67,22 +71,21 @@ get '/cmdb/get_properties' => sub {
 get '/cmdb/:uuid' => { uuid => undef } => sub {
     my $c = shift;
     if (defined $c->param('uuid')) {
-        my $ci = CMDB::BaseCI->load( $c->db, $c->param('uuid') );
-        app->log->debug(Dumper $ci);
         $c->render(
             template => 'ci',
-            ci => $ci,
+            ci => CMDB::BaseCI->load( $c->db, '{"uuid":"'.$c->param('uuid').'"}' ),
         );
     }
     else {
-        $c->render( template => 'index', classes => [ keys %classes ] );
+        $c->render( template => 'index', classes => [ keys %classes ], uuids => $c->db->selectall_arrayref(q{select uuid from data}) );
     }
 };
 
 post '/cmdb/:uuid' => { uuid => undef } => sub {
     my $c = shift;
     my %params = %{$c->req->params->to_hash};
-    my $class = delete $params{ci_class};
+    app->log->debug(Dumper \%params);
+    my $class = delete $params{_class};
     my %init = ();
     for my $key (keys %params) {
         if ($params{$key} ne q{}) {
@@ -107,22 +110,13 @@ sub load_class {
     return unless $class;
     return if (exists ($classes{ $class->{name} }));
 
-    my $superclass = 'CMDB::BaseCI';
-    if ( exists $class->{superclass} ) {
-        load_class( $cim->{classes}->{ lc( $class->{superclass} ) } );
-        $superclass = $class->{superclass};
-    }
     $classes{ $class->{name} } = Moose::Meta::Class->create(
         $class->{name} => (
-            'superclasses' => [
-                $superclass,
-            ],
+            'superclasses' => [ 'CMDB::BaseCI', ],
             'attributes' => [
                 map { Moose::Meta::Attribute->new( $_, is => 'rw', documentation => $class->{properties}->{$_}->{name} )} keys %{ $class->{properties} }
             ],
         )
     );
     $classes{ $class->{name} }->make_immutable;
-    app->log->debug("Created class: ".$class->{name});
 }
-
