@@ -15,19 +15,26 @@
 		</script>
 	</head>
 	<body>
+		<div>
 		<form id='ciform' method='post' action='/cmdb'>
 			<div id='CIClass'>
-				<select name='ci_class' onchange='get_attributes(this.value)'>
-					<% for my $class (sort @{$classes}) { %>
+				<select name='_class' onchange='get_attributes(this.value)'>
+% for my $class (sort @{$classes}) {
 						<option value="<%= $class %>">
 							<%= $class %>
 						</option>
-					<% } %>
+% }
 				</select>
 			</div>
 			<div id='CIProperties'>
 			</div>
-			<input type='submit' value='create'/>
+			<input type='submit' name='_action' value='create'/>
 		</form>
+		</div>
+		<div>
+% for my $uuid (map { $_->[-1] } @{$uuids}) {
+<a href="/cmdb/<%= $uuid %>"><%= $uuid %></a><br/>
+% }
+		</div>
 	</body>
 </html>
