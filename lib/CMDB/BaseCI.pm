@@ -1,6 +1,8 @@
 package CMDB::BaseCI;
 
 use Moose;
+use namespace::autoclean;
+
 use MooseX::Storage;
 use MooseX::Types::UUID qw(UUID);
 use UUID::Tiny ':std';
@@ -15,5 +17,7 @@ has 'uuid' => (
 );
 
 with Storage ( format => 'JSON', io => 'PgJSON' );
+
+__PACKAGE__->meta->make_immutable;
 
 1;
