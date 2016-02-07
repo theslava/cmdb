@@ -23,27 +23,10 @@ helper db => sub { $dbh };
 app->log->info("Schema: loading");
 
 use CMDB::Schema;
-my $cmdb_schema = CMDB::Schema->new({files => [ glob "etc/*.json" ] });
-app->log->debug(Dumper $cmdb_schema);
-
-my $cim = eval {
-    local $/ = undef;
-    open my $fh, q{<}, 'etc/dmtf_cim_schema_2.44.1.json';
-    my $ret = <$fh>;
-    close $fh;
-    return decode_json($ret);
-};
-helper cim => sub { $cim };
+my $cmdb_schema = CMDB::Schema->new({ files => [ glob "$FindBin::Bin/etc/*.json" ] });
+$cmdb_schema->load_class($_) for (keys %{ $cmdb_schema->schema->{classes} });
 
 app->log->info("Schema: loaded");
-app->log->info("Classes: creating");
-
-our %classes;
-for my $class (values %{ $cim->{classes} }) {
-    load_class($class);
-}
-
-app->log->info("Classes: created");
 app->log->info("Setting up routes");
 
 get '/cmdb/schema' => sub {
@@ -62,9 +45,10 @@ get '/cmdb/schema' => sub {
 
 get '/cmdb/get_properties' => sub {
     my $c = shift;
+    my $class = $c->req->param('class');
     $c->render( 
         template => 'properties',
-        metaclass => $classes{ $c->req->param('class') },
+        metaclass => eval { "$class"->meta },
     );
 };
 
@@ -73,11 +57,11 @@ get '/cmdb/:uuid' => { uuid => undef } => sub {
     if (defined $c->param('uuid')) {
         $c->render(
             template => 'ci',
-            ci => CMDB::BaseCI->load( $c->db, '{"uuid":"'.$c->param('uuid').'"}' ),
+            ci => CMDB::BaseCI->load( $c->db, encode_json( { uuid => $c->param('uuid') } ) ),
         );
     }
     else {
-        $c->render( template => 'index', classes => [ keys %classes ], uuids => $c->db->selectall_arrayref(q{select uuid from data}) );
+        $c->render( template => 'index', classes => [ keys %{ $cmdb_schema->schema->{classes} } ], uuids => $c->db->selectall_arrayref(q{select uuid from data}) );
     }
 };
 
@@ -105,18 +89,3 @@ post '/cmdb/:uuid' => { uuid => undef } => sub {
 app->log->info("Starting main loop");
 app->start;
 
-sub load_class {
-    my ($class) = @_;
-    return unless $class;
-    return if (exists ($classes{ $class->{name} }));
-
-    $classes{ $class->{name} } = Moose::Meta::Class->create(
-        $class->{name} => (
-            'superclasses' => [ 'CMDB::BaseCI', ],
-            'attributes' => [
-                map { Moose::Meta::Attribute->new( $_, is => 'rw', documentation => $class->{properties}->{$_}->{name} )} keys %{ $class->{properties} }
-            ],
-        )
-    );
-    $classes{ $class->{name} }->make_immutable;
-}
