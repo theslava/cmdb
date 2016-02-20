@@ -24,7 +24,7 @@ app->log->info("Schema: loading");
 
 use CMDB::Schema;
 my $cmdb_schema = CMDB::Schema->new({ files => [ glob "$FindBin::Bin/etc/*.json" ] });
-$cmdb_schema->load_class($_) for (keys %{ $cmdb_schema->schema->{classes} });
+push @INC, $cmdb_schema;
 
 app->log->info("Schema: loaded");
 app->log->info("Setting up routes");
@@ -55,10 +55,19 @@ get '/cmdb/get_properties' => sub {
 get '/cmdb/:uuid' => { uuid => undef } => sub {
     my $c = shift;
     if (defined $c->param('uuid')) {
-        $c->render(
-            template => 'ci',
-            ci => CMDB::BaseCI->load( $c->db, encode_json( { uuid => $c->param('uuid') } ) ),
-        );
+        my $ci = eval { CMDB::BaseCI->load( $c->db, encode_json( { uuid => $c->param('uuid') } ) ) };
+        if ($@) {
+            app->log->error($@);
+            $c->render(
+                text => 'There was an error, please see application log',
+            );
+        }
+        else {
+            $c->render(
+                template => 'ci',
+                ci => $ci,
+            );
+        }
     }
     else {
         $c->render( template => 'index', classes => [ keys %{ $cmdb_schema->schema->{classes} } ], uuids => $c->db->selectall_arrayref(q{select uuid from data}) );

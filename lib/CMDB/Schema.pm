@@ -16,7 +16,7 @@ has 'files' => (
 has 'schema' => (
     is => 'ro',
     isa => 'HashRef',
-    #    lazy => 1,
+    lazy => 1,
     builder => '_schema',
 );
 
@@ -31,16 +31,16 @@ sub _schema {
             close $fh;
             return decode_json($ret);
         };
-        $cim->{classes} = { map { $_->{name} => $_ } values %{ $cim->{classes} } };
         $schema = merge $schema, $cim;
     }
     return $schema;
 }
 
-sub load_class {
+sub CMDB::Schema::INC {
     my ($self, $class) = @_;
-    return unless $class;
-    ($class) = grep { $class eq $_->{name} } values %{ $self->schema->{classes} };
+    $class =~ s/\.pm$//;
+    $class =~ s/\/+/::/g;
+    $class = $self->schema->{classes}->{lc $class};
     return unless $class;
 
     Moose::Meta::Class->create(
@@ -51,7 +51,8 @@ sub load_class {
             ],
         )
     )->make_immutable;
-    return 1;
+    my $scalar = q{1;};
+    return (\$scalar);
 }
 
 __PACKAGE__->meta->make_immutable;
