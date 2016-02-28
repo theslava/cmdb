@@ -20,6 +20,12 @@ has 'schema' => (
     builder => '_schema',
 );
 
+sub BUILD {
+    my $self = shift;
+    push @INC, $self;
+    return $self;
+}
+
 sub _schema {
     my $self = shift;
     my $schema = {};

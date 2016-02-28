@@ -5,6 +5,7 @@ use FindBin::libs qw( base=moosex-storage-dbi-pgdoc subdir=lib subonly );
 use FindBin::libs;
 
 use CMDB::BaseCI;
+use CMDB::Schema;
 use DBI;
 use Data::Dumper;
 use JSON;
@@ -22,9 +23,7 @@ helper db => sub { $dbh };
 # Set up the data
 app->log->info("Schema: loading");
 
-use CMDB::Schema;
 my $cmdb_schema = CMDB::Schema->new({ files => [ glob "$FindBin::Bin/etc/*.json" ] });
-push @INC, $cmdb_schema;
 
 app->log->info("Schema: loaded");
 app->log->info("Setting up routes");
