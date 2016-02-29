@@ -18,6 +18,17 @@ has 'uuid' => (
 
 with Storage ( format => 'JSON', io => 'PgJSON' );
 
+before unpack => sub {
+    if ( exists $_[1]->{__CLASS__} ) {
+        my ($class) = split /-/, $_[1]->{__CLASS__};
+        eval "require $class";
+        if (!$@) {
+            $_[0] = $class;
+        }
+        warn "Require failed ($class): $@";
+    }
+};
+
 __PACKAGE__->meta->make_immutable;
 
 1;
