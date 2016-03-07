@@ -25,7 +25,10 @@ before unpack => sub {
         if (!$@) {
             $_[0] = $class;
         }
-        warn "Require failed ($class): $@";
+        else {
+            warn "Require failed ($class): $@";
+            warn "Going to initialize $_[0] instead";
+        }
     }
 };
 
